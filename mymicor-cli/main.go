@@ -15,6 +15,7 @@ func main() {
 	res, err := client.CreateConsignment(context.Background(), &pd.Consignment{Id: "123",})
 	if err != nil {
 		logrus.Errorf("ShippingServiceClient CreateConsignment error: %v", err)
+		panic("consignment cli error")
 	}
 	fmt.Printf("%v, %v", res.Created, res.Consignment)
 }

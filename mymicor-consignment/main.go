@@ -2,11 +2,11 @@ package main
 
 import (
 	"fmt"
-	"github.com/Sirupsen/logrus"
+	"github.com/sirupsen/logrus"
 	"github.com/micro/go-micro"
 	pd "github.com/xueTP/gen-proto/mymicor-consignment"
-	"mymicor/mymicor-server/data"
-	"mymicor/mymicor-server/server"
+	"mymicor/mymicor-consignment/data"
+	"mymicor/mymicor-consignment/server"
 	"os"
 )
 

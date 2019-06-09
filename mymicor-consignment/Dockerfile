@@ -1,7 +1,7 @@
 # vessel-service/Dockerfile
 FROM golang:1.9.0 as builder
 
-WORKDIR /go/src/mymicor/mymicor-server
+WORKDIR /go/src/mymicor/mymicor-consignment
 
 COPY . .
 
@@ -15,6 +15,6 @@ RUN apk --no-cache add ca-certificates
 
 RUN mkdir /app
 WORKDIR /app
-COPY --from=builder /go/src/mymicor/mymicor-server/mymicor-service .
+COPY --from=builder /go/src/mymicor/mymicor-consignment/mymicor-consignment .
 
-CMD ["./mymicor-server"]
+CMD ["./mymicor-consignment"]

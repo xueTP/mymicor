@@ -2,7 +2,7 @@ package lib
 
 import (
 	"context"
-	"github.com/Sirupsen/logrus"
+	"github.com/sirupsen/logrus"
 	"github.com/micro/go-micro/cmd"
 	vesselPd "github.com/xueTP/gen-proto/mymicor-vessel"
 	microClient "github.com/micro/go-micro/client"

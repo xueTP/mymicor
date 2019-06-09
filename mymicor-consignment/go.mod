@@ -8,7 +8,7 @@ require (
 	github.com/golang/protobuf v1.3.1
 	github.com/mattn/go-colorable v0.1.1 // indirect
 	github.com/micro/go-micro v1.1.0
-	github.com/sirupsen/logrus v1.4.1 // indirect
+	github.com/sirupsen/logrus v1.4.1
 	github.com/xueTP/gen-proto v0.0.0-20190504073722-abe73e0a6058
 	golang.org/x/net v0.0.0-20190424112056-4829fb13d2c6
 )

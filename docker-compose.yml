@@ -26,7 +26,7 @@ services:
       DB_HOST: "datastore:27017"
 
   user-service:
-    build: ./user-service
+    build: ./mymicor-user
     ports:
       - 50053:50051
     environment:

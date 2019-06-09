@@ -11,4 +11,5 @@ require (
 	github.com/satori/go.uuid v1.2.0
 	github.com/sirupsen/logrus v1.4.1
 	github.com/xueTP/gen-proto v0.0.0-20190512042843-9d00930657a0
+	golang.org/x/crypto v0.0.0-20190325154230-a5d413f7728c
 )

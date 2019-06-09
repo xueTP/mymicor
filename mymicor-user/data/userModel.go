@@ -36,6 +36,10 @@ func (this userModel) getUserCondition(user *pd.User) (string, []interface{}) {
 		where = append(where, "Id = ?")
 		value = append(value, user.Id)
 	}
+	if user.Email != "" {
+		where = append(where, "Email = ?")
+		value = append(value, user.Email)
+	}
 	return strings.Join(where, " and "), value
 }
 

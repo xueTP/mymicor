@@ -2,11 +2,11 @@ package server
 
 import (
 	"context"
-	"github.com/Sirupsen/logrus"
+	"github.com/sirupsen/logrus"
 	pd "github.com/xueTP/gen-proto/mymicor-consignment"
 	"gopkg.in/mgo.v2"
-	"mymicor/mymicor-server/data"
-	"mymicor/mymicor-server/lib"
+	"mymicor/mymicor-consignment/data"
+	"mymicor/mymicor-consignment/lib"
 )
 
 type ConsignmentServer struct{
