@@ -49,6 +49,7 @@ func main(){
 			r, err := client.Create(context.TODO(), &user)
 			if err != nil {
 				logrus.Errorf("user server client create err: %v, user: %+v", err, user)
+				panic(err)
 			}
 			logrus.Printf("create user success, user: %+v", r.User)
 			token, err := client.Auth(context.TODO(), &pd.User{Email: email, Password: password})

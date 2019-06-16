@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"github.com/jinzhu/gorm"
 	"github.com/micro/go-micro"
+	"github.com/micro/go-micro/broker"
 	"github.com/micro/go-micro/metadata"
 	"github.com/micro/go-micro/server"
 	"github.com/sirupsen/logrus"
@@ -16,6 +17,7 @@ import (
 )
 
 var conn *gorm.DB
+var pubSub broker.Broker
 
 func main() {
 	// gorm create conn
@@ -33,7 +35,9 @@ func main() {
 	)
 	srv.Init()
 
-	userServer := userserver.NewUserServer(conn)
+	pubSub = srv.Server().Options().Broker
+
+	userServer := userserver.NewUserServer(conn, pubSub)
 	// Register handler
 	pd.RegisterUserServiceHandler(srv.Server(), userServer)
 	if err := srv.Run(); err != nil {
@@ -53,7 +57,7 @@ func AuthHandel(fn server.HandlerFunc) server.HandlerFunc {
 		token := data["Token"]
 		log.Println("token is ", token)
 		var res *pd.Token
-		err := userserver.NewUserServer(conn).ValidateToken(context.TODO(), &pd.Token{Token: token}, res)
+		err := userserver.NewUserServer(conn, pubSub).ValidateToken(context.TODO(), &pd.Token{Token: token}, res)
 		if err != nil {
 			return err
 		}

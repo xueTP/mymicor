@@ -2,7 +2,9 @@ package server
 
 import (
 	"context"
+	"encoding/json"
 	"errors"
+	"github.com/micro/go-micro/broker"
 	"github.com/sirupsen/logrus"
 	"github.com/jinzhu/gorm"
 	pd "github.com/xueTP/gen-proto/mymicor-user"
@@ -14,12 +16,14 @@ import (
 type userServer struct{
 	userModel data.UserModeler
 	TokenServer TokenServerInterface
+	PubSub broker.Broker
 }
 
-func NewUserServer(conn *gorm.DB) userServer {
+func NewUserServer(conn *gorm.DB, pubSub broker.Broker) userServer {
 	return userServer{
 		userModel: data.NewUserModel(conn),
 		TokenServer: NewTokenServer(),
+		PubSub: pubSub,
 	}
 }
 
@@ -41,6 +45,25 @@ func (this userServer) Create(ctx context.Context, user *pd.User, res *pd.Respon
 		return err
 	}
 	res.User = user
+	// 发送用户注册触发事件
+	if err = this.userCreateEvent(user); err != nil {
+		return err
+	}
+	return nil
+}
+
+// userCreateEvent 用户创建触发事件
+func (this userServer) userCreateEvent(user *pd.User) error {
+	userJson, err := json.Marshal(user)
+	if err != nil {
+		logrus.Errorf("userServer UserCreateEvent user json Marshal error: %v, user: %+v", err, user)
+		return err
+	}
+	msg := &broker.Message{Header: map[string]string{"Id": user.Id}, Body: userJson}
+	if err = this.PubSub.Publish("user.create", msg); err != nil {
+		logrus.Errorf("userServer UserCreateEvent PubSub.Publish error: %v, msg: %+v", err, msg)
+		return err
+	}
 	return nil
 }
 
