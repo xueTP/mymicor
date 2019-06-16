@@ -6,6 +6,7 @@ import (
 	"github.com/micro/go-micro"
 	microClient "github.com/micro/go-micro/client"
 	"github.com/micro/go-micro/cmd"
+	"github.com/micro/go-micro/metadata"
 	"github.com/sirupsen/logrus"
 	pd "github.com/xueTP/gen-proto/mymicor-user"
 	"golang.org/x/net/context"
@@ -50,7 +51,13 @@ func main(){
 				logrus.Errorf("user server client create err: %v, user: %+v", err, user)
 			}
 			logrus.Printf("create user success, user: %+v", r.User)
-			getAll, err := client.GetAll(context.Background(), &pd.Request{})
+			token, err := client.Auth(context.TODO(), &pd.User{Email: email, Password: password})
+			if err != nil || token == nil {
+				log.Fatalf("user server Auth error: %v, token: %v", err, token)
+			}
+			logrus.Println("token is", token.Token)
+			ctx := metadata.NewContext(context.Background(), map[string]string{"token": token.Token})
+			getAll, err := client.GetAll(ctx, &pd.Request{})
 			if err != nil {
 				log.Fatalf("Could not list users: %v", err)
 			}

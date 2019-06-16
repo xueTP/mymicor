@@ -5,6 +5,7 @@ import (
 	"github.com/jinzhu/gorm"
 	_ "github.com/jinzhu/gorm/dialects/postgres"
 	"github.com/satori/go.uuid"
+	pd "github.com/xueTP/gen-proto/mymicor-user"
 	"os"
 )
 
@@ -21,13 +22,19 @@ func CreateConnection() (*gorm.DB, error) {
 	DBName = "postgres"
 	password = ""
 
-	return gorm.Open(
+	db, err := gorm.Open(
 		"postgres",
 		fmt.Sprintf(
 			"host=%s user=%s dbname=%s sslmode=disable password=%s",
 			host, user, DBName, password,
 		),
 	)
+	db.Model(true)
+	if err == nil {
+		db.DropTable(&pd.User{})
+		db.AutoMigrate(&pd.User{})
+	}
+	return db, err
 }
 
 func GetUUID() string {

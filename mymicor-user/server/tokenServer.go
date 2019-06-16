@@ -14,7 +14,7 @@ type TokenServerInterface interface {
 	Decode(token string) (*pd.User, error)
 }
 
-const salt = "ADSf34434Awqef23@#@$"
+var salt = []byte("ADSf34434Awqef23@#@$")
 
 // NewTokenServer New TokenServer Object
 func NewTokenServer() TokenServer {
@@ -22,7 +22,7 @@ func NewTokenServer() TokenServer {
 }
 
 type tokenContent struct {
-	user *pd.User
+	User *pd.User
 	jwt.StandardClaims
 }
 
@@ -36,7 +36,7 @@ func (TokenServer) Encode(user *pd.User) (string, error) {
 		},
 	}
 	// create token
-	token := jwt.NewWithClaims(jwt.SigningMethodRS256, tokenContent)
+	token := jwt.NewWithClaims(jwt.SigningMethodHS256, tokenContent)
 	return token.SignedString(salt)
 }
 
@@ -49,7 +49,7 @@ func (TokenServer) Decode(token string) (*pd.User, error) {
 		return &pd.User{}, err
 	}
 	if tokenContent, ok := tokenDn.Claims.(*tokenContent); ok {
-		return tokenContent.user, nil
+		return tokenContent.User, nil
 	}
 	return &pd.User{}, errors.New("token content is false")
 }

@@ -4,6 +4,7 @@ go 1.12
 
 require (
 	github.com/armon/circbuf v0.0.0-20190214190532-5111143e8da2 // indirect
+	github.com/dgrijalva/jwt-go v3.2.0+incompatible
 	github.com/jinzhu/gorm v1.9.8
 	github.com/kr/pty v1.1.3 // indirect
 	github.com/mattn/go-colorable v0.1.1 // indirect

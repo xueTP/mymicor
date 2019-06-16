@@ -92,7 +92,26 @@ func (this userServer) Auth(ctx context.Context, user *pd.User, token *pd.Token)
 }
 
 func (this userServer) ValidateToken(ctx context.Context, token *pd.Token, tokenRes *pd.Token) error {
-	// TODO : 待完善user服务
+	user, err := this.TokenServer.Decode(token.Token)
+	if err != nil {
+		return err
+	}
+	if user == nil || user.Email == "" {
+		return errors.New("this token is empty")
+	}
+	// get user info by user.Email
+	userRes, err := this.userModel.Get(&pd.User{Email: user.Email})
+	if err != nil {
+		logrus.Errorf("userServer ValidateToken error：%s, email: %s, password: %v", err, user.Email, user.Password)
+		return err
+	}
+	// check password
+	if userRes.Password != user.Password {
+		logrus.Errorf("userServer ValidateToken passwod is not ==, email: %s, password: %v", user.Email, user.Password)
+		return errors.New("password is not rightful")
+	}
+	tokenRes = &pd.Token{}
+	tokenRes.Token = token.Token
 	return nil
 }
 

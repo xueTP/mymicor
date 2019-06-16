@@ -1,17 +1,26 @@
 package main
 
 import (
+	"context"
+	"errors"
 	"fmt"
-	"github.com/sirupsen/logrus"
+	"github.com/jinzhu/gorm"
 	"github.com/micro/go-micro"
-	"mymicor/mymicor-user/data"
-	"mymicor/mymicor-user/server"
+	"github.com/micro/go-micro/metadata"
+	"github.com/micro/go-micro/server"
+	"github.com/sirupsen/logrus"
 	pd "github.com/xueTP/gen-proto/mymicor-user"
+	"log"
+	"mymicor/mymicor-user/data"
+	userserver "mymicor/mymicor-user/server"
 )
+
+var conn *gorm.DB
 
 func main() {
 	// gorm create conn
-	conn, err := data.CreateConnection()
+	var err error
+	conn, err = data.CreateConnection()
 	if err != nil {
 		logrus.Errorf("create gorm connection error: %v", err)
 	}
@@ -20,13 +29,34 @@ func main() {
 	srv := micro.NewService(
 		micro.Name("go.micro.srv.user"),
 		micro.Version("latest"),
+		micro.WrapHandler(AuthHandel),
 	)
 	srv.Init()
 
-	userServer := server.NewUserServer(conn)
+	userServer := userserver.NewUserServer(conn)
 	// Register handler
 	pd.RegisterUserServiceHandler(srv.Server(), userServer)
 	if err := srv.Run(); err != nil {
 		fmt.Println(err)
+	}
+}
+
+func AuthHandel(fn server.HandlerFunc) server.HandlerFunc {
+	return func(ctx context.Context, req server.Request, rsp interface{}) error {
+		if req.Method() == "UserService.Auth" || req.Method() == "UserService.Create" {
+			return fn(ctx, req, rsp)
+		}
+		data, ok := metadata.FromContext(ctx)
+		if ! ok {
+			return errors.New("no auth meta-data found in request")
+		}
+		token := data["Token"]
+		log.Println("token is ", token)
+		var res *pd.Token
+		err := userserver.NewUserServer(conn).ValidateToken(context.TODO(), &pd.Token{Token: token}, res)
+		if err != nil {
+			return err
+		}
+		return fn(ctx, req, rsp)
 	}
 }
