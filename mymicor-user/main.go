@@ -18,6 +18,7 @@ import (
 
 var conn *gorm.DB
 var pubSub broker.Broker
+var publish micro.Publisher
 
 func main() {
 	// gorm create conn
@@ -35,9 +36,14 @@ func main() {
 	)
 	srv.Init()
 
+	// go-micor broker 貌似默认使用nats 消息中间件，但是
+	// 我本地跑买有开启nats :4222 服务，但是还是能够接收
+	// 到发布事件
 	pubSub = srv.Server().Options().Broker
+	//go-micro 提供的pushlisher 服务 真正棒的部分在于它利用了 protobuf 的定义
+	publish = micro.NewPublisher("user.create", srv.Client())
 
-	userServer := userserver.NewUserServer(conn, pubSub)
+	userServer := userserver.NewUserServer(conn, pubSub, publish)
 	// Register handler
 	pd.RegisterUserServiceHandler(srv.Server(), userServer)
 	if err := srv.Run(); err != nil {
@@ -57,7 +63,7 @@ func AuthHandel(fn server.HandlerFunc) server.HandlerFunc {
 		token := data["Token"]
 		log.Println("token is ", token)
 		var res *pd.Token
-		err := userserver.NewUserServer(conn, pubSub).ValidateToken(context.TODO(), &pd.Token{Token: token}, res)
+		err := userserver.NewUserServer(conn, pubSub, publish).ValidateToken(context.TODO(), &pd.Token{Token: token}, res)
 		if err != nil {
 			return err
 		}

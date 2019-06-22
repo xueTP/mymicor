@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"errors"
+	"github.com/micro/go-micro"
 	"github.com/micro/go-micro/broker"
 	"github.com/sirupsen/logrus"
 	"github.com/jinzhu/gorm"
@@ -17,13 +18,15 @@ type userServer struct{
 	userModel data.UserModeler
 	TokenServer TokenServerInterface
 	PubSub broker.Broker
+	Publish micro.Publisher
 }
 
-func NewUserServer(conn *gorm.DB, pubSub broker.Broker) userServer {
+func NewUserServer(conn *gorm.DB, pubSub broker.Broker, publish micro.Publisher) userServer {
 	return userServer{
 		userModel: data.NewUserModel(conn),
 		TokenServer: NewTokenServer(),
 		PubSub: pubSub,
+		Publish: publish,
 	}
 }
 
@@ -46,7 +49,7 @@ func (this userServer) Create(ctx context.Context, user *pd.User, res *pd.Respon
 	}
 	res.User = user
 	// 发送用户注册触发事件
-	if err = this.userCreateEvent(user); err != nil {
+	if err = this.Publish.Publish(ctx, user); err != nil {
 		return err
 	}
 	return nil
